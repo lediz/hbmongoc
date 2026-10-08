@@ -1,0 +1,8 @@
+# local build: the hbmongoc package lives two directories up
+-i../../
+../../hbmongoc.hbc
+
+-L../../bin/linux/gcc
+-L../../.deps/usr/local/lib
+-ldflag+=-Wl,-rpath,../../bin/linux/gcc
+-ldflag+=-Wl,-rpath,../../.deps/usr/local/lib

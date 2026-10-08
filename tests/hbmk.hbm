@@ -1,2 +1,10 @@
+# local build: the hbmongoc package lives one directory up
+-i..
+../hbmongoc.hbc
 
-hbmongoc.hbc
+# hbmk2's "libpaths=" in .hbc only feeds .hbc lookup, so give the real
+# library search paths and runtime paths here (relative to this directory)
+-L../bin/linux/gcc
+-L../.deps/usr/local/lib
+-ldflag+=-Wl,-rpath,../bin/linux/gcc
+-ldflag+=-Wl,-rpath,../.deps/usr/local/lib

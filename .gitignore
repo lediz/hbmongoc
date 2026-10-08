@@ -1,3 +1,25 @@
 .hbmk
 lib
+bin
+.deps
 *.a
+*.so
+*.so.*
+
+# compiled test / example binaries
+tests/bson_iter_01
+tests/bson_iter_array_00
+tests/bson_iter_binary_00
+tests/bson_oid_01
+tests/bson_test_01
+tests/bson_test_02
+tests/bulk_operation_01
+tests/client_command_01
+tests/collection_find_01
+tests/import_docs_from_dbf
+tests/insert_docs
+tests/test_00
+tests/test_01
+tests/test_02
+tests/test_03
+examples/libbson/bcon-speed

@@ -8,9 +8,15 @@ headers=${hb_name}.ch
 
 libs=${_HB_DYNPREF}${hb_name}${_HB_DYNSUFF}
 
-libs=mongoc-1.0
-libs=bson-1.0
+# mongo-c-driver / libbson 2.x (sonames: libmongoc2.so.2, libbson2.so.2)
+libs=mongoc2
+libs=bson2
 
-libpaths=lib/${hb_plat}/${hb_comp}
+libpaths=${hb_dir}/bin/${hb_plat}/${hb_comp}
+libpaths=${hb_dir}/lib/${hb_plat}/${hb_comp}
+{linux}libpaths=${hb_dir}/.deps/usr/local/lib
 {darwin}libpaths=/usr/local/lib
-{linux}libpaths=/usr/local/lib
+
+# resolve the vendored 2.x libraries at runtime
+{linux&gcc}dflags+=-Wl,-rpath,${hb_dir}/.deps/usr/local/lib
+{linux&gcc}dflags+=-Wl,-rpath,${hb_dir}/bin/${hb_plat}/${hb_comp}

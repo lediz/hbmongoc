@@ -25,6 +25,7 @@
 
 /* bson macros */
 #xtranslate BSON_APPEND_ARRAY( <document>, <key>, <array> ) => bson_append_array( <document>, <key>, -1, <array> )
+#xtranslate BSON_APPEND_ARRAY_UNSAFE_BEGIN( <document>, <key>, <child> ) => bson_append_array_unsafe_begin( <document>, <key>, -1, <child> )
 #xtranslate BSON_APPEND_ARRAY_BEGIN( <document>, <key>, <child> ) => bson_append_array_begin( <document>, <key>, -1, <child> )
 #xtranslate BSON_APPEND_BINARY( <document>, <key>, <binData> ) => bson_append_binary ( <document>, <key>, -1, nil, <binData>, nil )
 #xtranslate BSON_APPEND_BOOL( <document>, <key>, <value> ) => bson_append_bool( <document>, <key>, -1, <value> )
@@ -48,7 +49,7 @@
 /* mongoc_query_flags_t ( DEPRECATED ) */
 #define MONGOC_QUERY_NONE               0
 #define MONGOC_QUERY_TAILABLE_CURSOR    hb_bitShift( 1, 1 )
-#define MONGOC_QUERY_SLAVE_OK           hb_bitShift( 1, 2 )
+#define MONGOC_QUERY_SECONDARY_OK       hb_bitShift( 1, 2 )
 #define MONGOC_QUERY_OPLOG_REPLAY       hb_bitShift( 1, 3 )
 #define MONGOC_QUERY_NO_CURSOR_TIMEOUT  hb_bitShift( 1, 4 )
 #define MONGOC_QUERY_AWAIT_DATA         hb_bitShift( 1, 5 )
@@ -57,7 +58,6 @@
 
 /* mongoc_write_concern_t */
 #define MONGOC_WRITE_CONCERN_W_UNACKNOWLEDGED   0
-#define MONGOC_WRITE_CONCERN_W_ERRORS_IGNORED   -1 /* deprecated */
 #define MONGOC_WRITE_CONCERN_W_DEFAULT          -2
 #define MONGOC_WRITE_CONCERN_W_MAJORITY         -3
 #define MONGOC_WRITE_CONCERN_W_TAG              -4
@@ -75,6 +75,7 @@
 #define BSON_VALIDATE_DOT_KEYS          hb_bitShift( 1, 2 )
 #define BSON_VALIDATE_UTF8_ALLOW_NULL   hb_bitShift( 1, 3 )
 #define BSON_VALIDATE_EMPTY_KEYS        hb_bitShift( 1, 4 )
+#define BSON_VALIDATE_CORRUPT           hb_bitShift( 1, 5 )
 
 /* bson_context_t */
 #define BSON_CONTEXT_NONE               0
@@ -114,6 +115,10 @@
 #define BSON_SUBTYPE_UUID_DEPRECATED    0x03
 #define BSON_SUBTYPE_UUID               0x04
 #define BSON_SUBTYPE_MD5                0x05
+#define BSON_SUBTYPE_ENCRYPTED          0x06
+#define BSON_SUBTYPE_COLUMN             0x07
+#define BSON_SUBTYPE_SENSITIVE          0x08
+#define BSON_SUBTYPE_VECTOR             0x09
 #define BSON_SUBTYPE_USER               0x80
 
 #endif /* hbmongoc_ch */

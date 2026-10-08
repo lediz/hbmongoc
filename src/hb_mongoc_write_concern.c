@@ -10,7 +10,6 @@
 #include "hb_mongoc.h"
 
 HB_FUNC( MONGOC_WRITE_CONCERN_APPEND )
-#if MONGOC_CHECK_VERSION( 1, 5, 0 )
 {
     mongoc_write_concern_t * write_concern = mongoc_hbparam( 1, _hbmongoc_write_concern_t_ );
     bson_t * doc = bson_hbparam( 2, HB_IT_POINTER );
@@ -22,11 +21,6 @@ HB_FUNC( MONGOC_WRITE_CONCERN_APPEND )
         HBMONGOC_ERR_ARGS();
     }
 }
-#else
-{
-    HBMONGOC_ERR_NOFUNC();
-}
-#endif
 
 HB_FUNC( MONGOC_WRITE_CONCERN_COPY )
 {
@@ -102,7 +96,6 @@ HB_FUNC( MONGOC_WRITE_CONCERN_GET_WTIMEOUT )
 }
 
 HB_FUNC( MONGOC_WRITE_CONCERN_IS_ACKNOWLEDGED )
-#if MONGOC_CHECK_VERSION( 1, 5, 0 )
 {
     mongoc_write_concern_t * write_concern = mongoc_hbparam( 1, _hbmongoc_write_concern_t_ );
 
@@ -113,14 +106,8 @@ HB_FUNC( MONGOC_WRITE_CONCERN_IS_ACKNOWLEDGED )
         HBMONGOC_ERR_ARGS();
     }
 }
-#else
-{
-    HBMONGOC_ERR_NOFUNC();
-}
-#endif
 
 HB_FUNC( MONGOC_WRITE_CONCERN_IS_DEFAULT )
-#if MONGOC_CHECK_VERSION( 1, 7, 0 )
 {
     mongoc_write_concern_t * write_concern = mongoc_hbparam( 1, _hbmongoc_write_concern_t_ );
 
@@ -131,14 +118,8 @@ HB_FUNC( MONGOC_WRITE_CONCERN_IS_DEFAULT )
         HBMONGOC_ERR_ARGS();
     }
 }
-#else
-{
-    HBMONGOC_ERR_NOFUNC();
-}
-#endif
 
 HB_FUNC( MONGOC_WRITE_CONCERN_IS_VALID )
-#if MONGOC_CHECK_VERSION( 1, 5, 0 )
 {
     mongoc_write_concern_t * write_concern = mongoc_hbparam( 1, _hbmongoc_write_concern_t_ );
 
@@ -149,14 +130,8 @@ HB_FUNC( MONGOC_WRITE_CONCERN_IS_VALID )
         HBMONGOC_ERR_ARGS();
     }
 }
-#else
-{
-    HBMONGOC_ERR_NOFUNC();
-}
-#endif
 
 HB_FUNC( MONGOC_WRITE_CONCERN_JOURNAL_IS_SET )
-#if MONGOC_CHECK_VERSION( 1, 5, 0 )
 {
     mongoc_write_concern_t * write_concern = mongoc_hbparam( 1, _hbmongoc_write_concern_t_ );
 
@@ -167,11 +142,6 @@ HB_FUNC( MONGOC_WRITE_CONCERN_JOURNAL_IS_SET )
         HBMONGOC_ERR_ARGS();
     }
 }
-#else
-{
-    HBMONGOC_ERR_NOFUNC();
-}
-#endif
 
 HB_FUNC( MONGOC_WRITE_CONCERN_SET_JOURNAL )
 {
@@ -238,4 +208,38 @@ HB_FUNC( MONGOC_WRITE_CONCERN_NEW )
     mongoc_write_concern_t * write_concern = mongoc_write_concern_new();
     PHB_MONGOC phWrite_concern = hbmongoc_new_dataContainer( _hbmongoc_write_concern_t_, write_concern );
     hb_retptrGC( phWrite_concern );
+}
+
+HB_FUNC( MONGOC_WRITE_CONCERN_DESTROY )
+{
+    PHB_MONGOC write_concern = hbmongoc_param( 1, _hbmongoc_write_concern_t_ );
+
+    if ( write_concern ) {
+        mongoc_write_concern_destroy( write_concern->p );
+        write_concern->p = NULL;
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_WRITE_CONCERN_GET_WTIMEOUT_INT64 )
+{
+    const mongoc_write_concern_t * write_concern = mongoc_hbparam( 1, _hbmongoc_write_concern_t_ );
+
+    if ( write_concern ) {
+        hb_retnll( (HB_LONGLONG) mongoc_write_concern_get_wtimeout_int64( write_concern ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_WRITE_CONCERN_SET_WTIMEOUT_INT64 )
+{
+    mongoc_write_concern_t * write_concern = mongoc_hbparam( 1, _hbmongoc_write_concern_t_ );
+
+    if ( write_concern && HB_ISNUM( 2 ) ) {
+        mongoc_write_concern_set_wtimeout_int64( write_concern, ( int64_t ) hb_parnll( 2 ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
 }

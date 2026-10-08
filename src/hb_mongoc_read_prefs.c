@@ -39,7 +39,6 @@ HB_FUNC( MONGOC_READ_PREFS_COPY )
 }
 
 HB_FUNC( MONGOC_READ_PREFS_GET_MAX_STALENESS_SECONDS )
-#if MONGOC_CHECK_VERSION( 1, 5, 0 )
 {
     const mongoc_read_prefs_t * read_prefs = mongoc_hbparam( 1, _hbmongoc_read_prefs_t_ );
 
@@ -50,11 +49,6 @@ HB_FUNC( MONGOC_READ_PREFS_GET_MAX_STALENESS_SECONDS )
         HBMONGOC_ERR_ARGS();
     }
 }
-#else
-{
-    HBMONGOC_ERR_NOFUNC();
-}
-#endif
 
 HB_FUNC( MONGOC_READ_PREFS_GET_MODE )
 {
@@ -106,7 +100,6 @@ HB_FUNC( MONGOC_READ_PREFS_NEW )
 }
 
 HB_FUNC( MONGOC_READ_PREFS_SET_MAX_STALENESS_SECONDS )
-#if MONGOC_CHECK_VERSION( 1, 5, 0 )
 {
     mongoc_read_prefs_t * read_prefs = mongoc_hbparam( 1, _hbmongoc_read_prefs_t_ );
 
@@ -117,11 +110,6 @@ HB_FUNC( MONGOC_READ_PREFS_SET_MAX_STALENESS_SECONDS )
         HBMONGOC_ERR_ARGS();
     }
 }
-#else
-{
-    HBMONGOC_ERR_NOFUNC();
-}
-#endif
 
 HB_FUNC( MONGOC_READ_PREFS_SET_MODE )
 {
@@ -148,5 +136,50 @@ HB_FUNC( MONGOC_READ_PREFS_SET_TAGS )
 
     if ( tags && ! HB_ISPOINTER( 2 ) ) {
         bson_destroy( tags );
+    }
+}
+
+HB_FUNC( MONGOC_READ_PREFS_DESTROY )
+{
+    PHB_MONGOC read_prefs = hbmongoc_param( 1, _hbmongoc_read_prefs_t_ );
+
+    if ( read_prefs ) {
+        mongoc_read_prefs_destroy( read_prefs->p );
+        read_prefs->p = NULL;
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_READ_PREFS_GET_HEDGE )
+{
+    const mongoc_read_prefs_t * read_prefs = mongoc_hbparam( 1, _hbmongoc_read_prefs_t_ );
+
+    if ( read_prefs ) {
+        const bson_t * hedge = mongoc_read_prefs_get_hedge( read_prefs );
+        if ( hedge ) {
+            PHB_BSON phBson = hbbson_new_dataContainer( _hbbson_t_, bson_copy( hedge ) );
+            hb_retptrGC( phBson );
+        } else {
+            hb_ret();
+        }
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_READ_PREFS_SET_HEDGE )
+{
+    mongoc_read_prefs_t * read_prefs = mongoc_hbparam( 1, _hbmongoc_read_prefs_t_ );
+    bson_t * hedge = bson_hbparam( 2, HB_IT_ANY );
+
+    if ( read_prefs && hedge ) {
+        mongoc_read_prefs_set_hedge( read_prefs, hedge );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+
+    if ( hedge && ! HB_ISPOINTER( 2 ) ) {
+        bson_destroy( hedge );
     }
 }

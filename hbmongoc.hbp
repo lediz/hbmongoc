@@ -4,6 +4,12 @@
 #-o${hb_name}
 -olib/${hb_plat}/${hb_comp}/${hb_name}
 
+# link the vendored mongo-c-driver 2.x libraries into the package's own dynamic library
+{hbdyn}-L${hb_curdir}/.deps/usr/local/lib
+{hbdyn}-lmongoc2
+{hbdyn}-lbson2
+{hbdyn&linux}-dflag+=-Wl,-rpath,${hb_curdir}/.deps/usr/local/lib
+
 {darwin}-cflag=-Wno-documentation-unknown-command
 
 -w3 -es2 -gc3
@@ -14,6 +20,12 @@
 -depkeyhead=libmongoc:mongoc.h
 #-depcontrol=libmongoc:no{HB_BUILD_3RDEXT='no'}
 #-depcontrol=libmongoc:${HB_WITH_LIBMONGOC}
+
+# vendored mongo-c-driver 2.5.5 (built into .deps/ — see BUILD.md)
+-cflag=-I${hb_curdir}/.deps/usr/local/include/bson-2.5.5
+-cflag=-I${hb_curdir}/.deps/usr/local/include/mongoc-2.5.5
+-depincpath=libmongoc:.deps/usr/local/include/mongoc-2.5.5/mongoc
+-depincpath=libbson:.deps/usr/local/include/bson-2.5.5/bson
 -depincpath=libmongoc:/usr/include
 -depincpath=libmongoc:/usr/local/include
 -depincpath=libmongoc:/usr/local/include/libmongoc-1.0

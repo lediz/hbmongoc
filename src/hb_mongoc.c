@@ -48,6 +48,55 @@ static HB_GARBAGE_FUNC( hbmongoc_funcs_destroy )
             case _hbmongoc_bulk_operation_t_:
                 mongoc_bulk_operation_destroy( ( mongoc_bulk_operation_t * ) phMongoc->p );
                 break;
+            case _hbmongoc_read_concern_t_:
+                mongoc_read_concern_destroy( ( mongoc_read_concern_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_session_t_:
+                mongoc_client_session_destroy( ( mongoc_client_session_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_transaction_opts_t_:
+                mongoc_transaction_opts_destroy( ( mongoc_transaction_opt_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_session_opts_t_:
+                mongoc_session_opts_destroy( ( mongoc_session_opt_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_find_and_modify_opts_t_:
+                mongoc_find_and_modify_opts_destroy( ( mongoc_find_and_modify_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_change_stream_t_:
+                mongoc_change_stream_destroy( ( mongoc_change_stream_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_server_description_t_:
+                mongoc_server_description_destroy( ( mongoc_server_description_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_server_api_t_:
+                mongoc_server_api_destroy( ( mongoc_server_api_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_index_model_t_:
+                mongoc_index_model_destroy( ( mongoc_index_model_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_topology_description_t_:
+                mongoc_topology_description_destroy( ( mongoc_topology_description_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_apm_callbacks_t_:
+                mongoc_apm_callbacks_destroy( ( mongoc_apm_callbacks_t * ) phMongoc->p );
+                break;
+            /* APM event and context objects are owned by mongoc and are
+               only valid during a callback - never destroy them here. */
+            case _hbmongoc_apm_context_t_:
+            case _hbmongoc_apm_command_started_t_:
+            case _hbmongoc_apm_command_succeeded_t_:
+            case _hbmongoc_apm_command_failed_t_:
+            case _hbmongoc_apm_server_changed_t_:
+            case _hbmongoc_apm_server_opening_t_:
+            case _hbmongoc_apm_server_closed_t_:
+            case _hbmongoc_apm_topology_changed_t_:
+            case _hbmongoc_apm_topology_opening_t_:
+            case _hbmongoc_apm_topology_closed_t_:
+            case _hbmongoc_apm_server_heartbeat_started_t_:
+            case _hbmongoc_apm_server_heartbeat_succeeded_t_:
+            case _hbmongoc_apm_server_heartbeat_failed_t_:
+                break;
         }
         phMongoc->p = NULL;
     }
@@ -84,6 +133,13 @@ static void hbmongoc_check_inited()
 PHB_MONGOC hbmongoc_param( int iParam, hbmongoc_t_ type )
 {
     PHB_MONGOC phMongo = hb_parptrGC( &s_gc_mongoc_funcs, iParam );
+
+    return phMongo && phMongo->type == type ? phMongo : NULL;
+}
+
+PHB_MONGOC hbmongoc_hbparam( PHB_ITEM pItem, hbmongoc_t_ type )
+{
+    PHB_MONGOC phMongo = hb_itemGetPtrGC( pItem, &s_gc_mongoc_funcs );
 
     return phMongo && phMongo->type == type ? phMongo : NULL;
 }
@@ -134,8 +190,110 @@ void * mongoc_hbparam( int iParam, hbmongoc_t_ type )
     return NULL;
 }
 
+void * mongoc_hbparam_any( int iParam )
+{
+    PHB_MONGOC phMongoc = hbmongoc_param( iParam, _hbmongoc_client_t_ );
+
+    if ( phMongoc == NULL ) {
+        phMongoc = hbmongoc_param( iParam, _hbmongoc_database_t_ );
+        if ( phMongoc == NULL ) {
+            phMongoc = hbmongoc_param( iParam, _hbmongoc_collection_t_ );
+            if ( phMongoc == NULL ) {
+                phMongoc = hbmongoc_param( iParam, _hbmongoc_uri_t_ );
+                if ( phMongoc == NULL ) {
+                    phMongoc = hbmongoc_param( iParam, _hbmongoc_cursor_t_ );
+                    if ( phMongoc == NULL ) {
+                        phMongoc = hbmongoc_param( iParam, _hbmongoc_write_concern_t_ );
+                        if ( phMongoc == NULL ) {
+                            phMongoc = hbmongoc_param( iParam, _hbmongoc_read_prefs_t_ );
+                            if ( phMongoc == NULL ) {
+                                phMongoc = hbmongoc_param( iParam, _hbmongoc_bulk_operation_t_ );
+                                if ( phMongoc == NULL ) {
+                                    phMongoc = hbmongoc_param( iParam, _hbmongoc_read_concern_t_ );
+                                    if ( phMongoc == NULL ) {
+                                        phMongoc = hbmongoc_param( iParam, _hbmongoc_client_session_t_ );
+                                        if ( phMongoc == NULL ) {
+                                            phMongoc = hbmongoc_param( iParam, _hbmongoc_transaction_opts_t_ );
+                                            if ( phMongoc == NULL ) {
+                                                phMongoc = hbmongoc_param( iParam, _hbmongoc_session_opts_t_ );
+                                                if ( phMongoc == NULL ) {
+                                                    phMongoc = hbmongoc_param( iParam, _hbmongoc_find_and_modify_opts_t_ );
+                                                    if ( phMongoc == NULL ) {
+                                                        phMongoc = hbmongoc_param( iParam, _hbmongoc_change_stream_t_ );
+                                                        if ( phMongoc == NULL ) {
+                                                            phMongoc = hbmongoc_param( iParam, _hbmongoc_server_description_t_ );
+                                                            if ( phMongoc == NULL ) {
+                                                                phMongoc = hbmongoc_param( iParam, _hbmongoc_server_api_t_ );
+                                                                if ( phMongoc == NULL ) {
+                                                                    phMongoc = hbmongoc_param( iParam, _hbmongoc_index_model_t_ );
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return phMongoc ? phMongoc->p : NULL;
+}
+
 
 /* Harbour API */
+
+void hbmongoc_stor_byref_value( int iParam, const bson_value_t * value )
+{
+    if ( HB_ISBYREF( iParam ) ) {
+        if ( value ) {
+            switch ( value->value_type ) {
+                case BSON_TYPE_NULL:
+                    hb_stor( iParam );
+                    break;
+                case BSON_TYPE_BOOL:
+                    hb_storl( value->value.v_bool, iParam );
+                    break;
+                case BSON_TYPE_INT32:
+                    hb_storni( value->value.v_int32, iParam );
+                    break;
+                case BSON_TYPE_INT64:
+                    hb_stornll( (HB_LONGLONG) value->value.v_int64, iParam );
+                    break;
+                case BSON_TYPE_DOUBLE:
+                    hb_stornd( value->value.v_double, iParam );
+                    break;
+                case BSON_TYPE_UTF8:
+                    hb_storclen( value->value.v_utf8.str, value->value.v_utf8.len, iParam );
+                    break;
+                case BSON_TYPE_SYMBOL:
+                    hb_storclen( value->value.v_symbol.symbol, value->value.v_symbol.len, iParam );
+                    break;
+                case BSON_TYPE_OID:
+                    {
+                        char szOID[ 25 ];
+                        bson_oid_to_string( ( const bson_oid_t * ) &value->value.v_oid, szOID );
+                        hb_storc( szOID, iParam );
+                    }
+                    break;
+                case BSON_TYPE_DATE_TIME:
+                    hb_storclen( ( const char * ) &value->value.v_datetime, sizeof( int64_t ), iParam );
+                    break;
+                default:
+                    hb_stor( iParam );
+                    break;
+            }
+        } else {
+            hb_stor( iParam );
+        }
+    }
+}
 
 HB_FUNC( HB_NUMTYPE )
 {
@@ -221,4 +379,178 @@ HB_FUNC( MONGOC_GET_VERSION )
 HB_FUNC( MONGOC_INIT )
 {
     hbmongoc_check_inited();
+}
+
+/* server api */
+
+HB_FUNC( MONGOC_SERVER_API_NEW )
+{
+    mongoc_server_api_version_t version;
+
+    if ( HB_ISNUM( 1 ) ) {
+        version = ( mongoc_server_api_version_t ) hb_parni( 1 );
+    } else if ( HB_IS_STRING( 1 ) ) {
+        if ( ! mongoc_server_api_version_from_string( hb_parc( 1 ), &version ) ) {
+            HBMONGOC_ERR_ARGS();
+            return;
+        }
+    } else {
+        HBMONGOC_ERR_ARGS();
+        return;
+    }
+
+    mongoc_server_api_t * api = mongoc_server_api_new( version );
+    if ( api ) {
+        PHB_MONGOC phApi = hbmongoc_new_dataContainer( _hbmongoc_server_api_t_, api );
+        hb_retptrGC( phApi );
+    } else {
+        hb_ret();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_DEPRECATION_ERRORS )
+{
+    mongoc_server_api_t * api = mongoc_hbparam( 1, _hbmongoc_server_api_t_ );
+
+    if ( api && HB_ISLOG( 2 ) ) {
+        mongoc_server_api_deprecation_errors( api, hb_parl( 2 ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_STRICT )
+{
+    mongoc_server_api_t * api = mongoc_hbparam( 1, _hbmongoc_server_api_t_ );
+
+    if ( api && HB_ISLOG( 2 ) ) {
+        mongoc_server_api_strict( api, hb_parl( 2 ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_GET_DEPRECATION_ERRORS )
+{
+    const mongoc_server_api_t * api = mongoc_hbparam( 1, _hbmongoc_server_api_t_ );
+
+    if ( api ) {
+        const mongoc_optional_t * opt = mongoc_server_api_get_deprecation_errors( api );
+        hb_retl( opt ? mongoc_optional_value( opt ) : false );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_GET_STRICT )
+{
+    const mongoc_server_api_t * api = mongoc_hbparam( 1, _hbmongoc_server_api_t_ );
+
+    if ( api ) {
+        const mongoc_optional_t * opt = mongoc_server_api_get_strict( api );
+        hb_retl( opt ? mongoc_optional_value( opt ) : false );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_GET_VERSION )
+{
+    const mongoc_server_api_t * api = mongoc_hbparam( 1, _hbmongoc_server_api_t_ );
+
+    if ( api ) {
+        hb_retni( ( int ) mongoc_server_api_get_version( api ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_COPY )
+{
+    const mongoc_server_api_t * api = mongoc_hbparam( 1, _hbmongoc_server_api_t_ );
+
+    if ( api ) {
+        mongoc_server_api_t * copy = mongoc_server_api_copy( api );
+        PHB_MONGOC phApi = hbmongoc_new_dataContainer( _hbmongoc_server_api_t_, copy );
+        hb_retptrGC( phApi );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_DESTROY )
+{
+    PHB_MONGOC api = hbmongoc_param( 1, _hbmongoc_server_api_t_ );
+
+    if ( api ) {
+        mongoc_server_api_destroy( api->p );
+        api->p = NULL;
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_VERSION_TO_STRING )
+{
+    if ( HB_ISNUM( 1 ) ) {
+        mongoc_server_api_version_t version = ( mongoc_server_api_version_t ) hb_parni( 1 );
+        hb_retc( mongoc_server_api_version_to_string( version ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_SERVER_API_VERSION_FROM_STRING )
+{
+    const char * version = hb_parc( 1 );
+
+    if ( version ) {
+        mongoc_server_api_version_t out;
+        if ( mongoc_server_api_version_from_string( version, &out ) ) {
+            hb_retni( ( int ) out );
+        } else {
+            hb_ret();
+        }
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+/* log */
+
+HB_FUNC( MONGOC_LOG_TRACE_ENABLE )
+{
+    mongoc_log_trace_enable();
+}
+
+HB_FUNC( MONGOC_LOG_TRACE_DISABLE )
+{
+    mongoc_log_trace_disable();
+}
+
+HB_FUNC( MONGOC_LOG_LEVEL_STR )
+{
+    if ( HB_ISNUM( 1 ) ) {
+        hb_retc( mongoc_log_level_str( ( mongoc_log_level_t ) hb_parni( 1 ) ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_LOG_DEFAULT_HANDLER )
+{
+    if ( HB_ISNUM( 1 ) && HB_IS_STRING( 2 ) && HB_IS_STRING( 3 ) ) {
+        mongoc_log_default_handler( ( mongoc_log_level_t ) hb_parni( 1 ), hb_parc( 2 ), hb_parc( 3 ), NULL );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
+}
+
+HB_FUNC( MONGOC_LOG )
+{
+    if ( HB_ISNUM( 1 ) && HB_IS_STRING( 2 ) && HB_IS_STRING( 3 ) ) {
+        mongoc_log( ( mongoc_log_level_t ) hb_parni( 1 ), hb_parc( 2 ), "%s", hb_parc( 3 ) );
+    } else {
+        HBMONGOC_ERR_ARGS();
+    }
 }

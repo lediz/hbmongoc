@@ -124,11 +124,15 @@ PROCEDURE main( uri )
                encryption object; point them at this same client. */
             mongoc_client_encryption_opts_set_keyvault_client( encOpts, client )
             mongoc_client_encryption_opts_set_keyvault_namespace( encOpts, "testdb", "keys" )
-            /* keyvault-only construction: proves the libmongocrypt code path
-               runs (error is a real usage requirement, not "not built").
-               A full encrypt round-trip needs the exact mongoc local-KMS
-               provider schema (keyMaterial shape), not reproduced here. */
+            /* local KMS provider: { local : { key : <96-byte binary> } } */
+            mongoc_client_encryption_opts_set_local_kms_key( encOpts, "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456" )
             enc := mongoc_client_encryption_new( encOpts, @error )
+            IF enc # nil
+                ? "client_encryption_new: ok (local KMS 96-byte key accepted)"
+                /* full encrypt round-trip not driven here: mongoc_client_encryption_encrypt
+                   traffics in bson_value_t* in/out params that have no Harbour box type. */
+                mongoc_client_encryption_destroy( enc )
+            ENDIF
             IF enc # nil
                 ? "client_encryption_new: ok"
                 mongoc_client_encryption_destroy( enc )

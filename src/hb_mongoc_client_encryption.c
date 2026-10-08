@@ -191,7 +191,10 @@ HB_FUNC( MONGOC_CLIENT_ENCRYPTION_OPTS_SET_LOCAL_KMS_KEY )
       bson_init( &providers );
       bson_init( &local );
 
-      bson_append_utf8( &local, "keyMaterial", -1, key, (int) strlen( key ) );
+      /* local KMS provider schema (libmongocrypt mongocrypt-opts.c):
+         { local : { key : <binary, exactly 96 bytes> } } */
+      bson_append_binary( &local, "key", -1, BSON_SUBTYPE_BINARY,
+                          (const uint8_t *) key, (uint32_t) strlen( key ) );
       bson_append_document( &providers, "local", -1, &local );
 
       mongoc_client_encryption_opts_set_kms_providers( opts, &providers );
@@ -309,6 +312,31 @@ HB_ENC_SET_STR( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_ALGORITHM, client_encr
 HB_ENC_SET_STR( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_KEYALTNAME, client_encryption_encrypt_opts, mongoc_client_encryption_encrypt_opts_set_keyaltname )
 HB_ENC_SET_STR( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_QUERY_TYPE, client_encryption_encrypt_opts, mongoc_client_encryption_encrypt_opts_set_query_type )
 HB_ENC_SET_VAL( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_KEYID, client_encryption_encrypt_opts, mongoc_client_encryption_encrypt_opts_set_keyid )
+
+/* keyid from a plain Harbour string: build a bson_value_t in C, because
+   a Harbour string is not a wrapped bson_value_t. */
+HB_FUNC( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_KEYID_STR )
+{
+   mongoc_client_encryption_encrypt_opts_t * opts = mongoc_hbparam( 1, _hbmongoc_client_encryption_encrypt_opts_t_ );
+   const char * keyid = hb_parc( 2 );
+
+   if ( opts && keyid )
+   {
+      bson_value_t val;
+      memset( &val, 0, sizeof( val ) );
+      val.value_type = BSON_TYPE_UTF8;
+      val.value.v_utf8.str = (char *) keyid;
+      val.value.v_utf8.len = (uint32_t) strlen( keyid );
+      /* set_keyid copies the value into opts, so the stack val needs no
+         destroy and must not free Harbour's keyid string. */
+      mongoc_client_encryption_encrypt_opts_set_keyid( opts, &val );
+      hb_retl( true );
+   }
+   else
+   {
+      HBMONGOC_ERR_ARGS();
+   }
+}
 HB_ENC_SET_I64( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_CONTENTION_FACTOR, client_encryption_encrypt_opts, mongoc_client_encryption_encrypt_opts_set_contention_factor )
 HB_ENC_SET_OBJ( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_RANGE_OPTS, client_encryption_encrypt_opts, client_encryption_encrypt_range_opts, mongoc_client_encryption_encrypt_opts_set_range_opts )
 HB_ENC_SET_OBJ( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_SET_STRING_OPTS, client_encryption_encrypt_opts, client_encryption_encrypt_string_opts, mongoc_client_encryption_encrypt_opts_set_string_opts )

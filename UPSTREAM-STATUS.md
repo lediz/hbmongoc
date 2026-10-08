@@ -105,9 +105,31 @@ Caveats on the APM layer, not yet verified against a live `mongod`:
 - The event pointer must not be retained past the callback.
 - Only one code block can be registered per event kind process-wide.
 
-Still open: the remaining ~807 unwrapped 2.x functions (bulkwrite, client-side
-encryption, read-concern, SSL, BSON vectors, index models, …) — see
-[`docs/upstream-api-delta.md`](docs/upstream-api-delta.md).
+Still open: the remaining unwrapped 2.x functions — regenerate the accurate
+count with `tools/api-delta.sh` (the checked-in delta doc drifts). Most of the
+remainder is genuinely not wrappable in Harbour: C function pointers (apm /
+oidc / stream-initiator setters), value-semantics structs (bson_vector_*_view_t,
+struct sockaddr, oidc_callback_params_t), and bcon varargs macros.
+
+## Client-side encryption: not buildable in this environment
+
+`mongoc_client_encryption_*` compiles and links, but at runtime reports
+"libmongoc is not built with support for Client-Side Field Level Encryption".
+Forcing `ENABLE_CLIENT_SIDE_ENCRYPTION=ON` in the `.deps` cmake fails:
+
+```
+CMake Error at src/libmongoc/CMakeLists.txt:517 (message):
+  Required library (libmongocrypt) not found.
+```
+
+Client-side encryption needs **libmongocrypt**, a separate MongoDB library
+(https://github.com/mongodb/libmongocrypt) that is not part of mongo-c-driver
+and is not present in `.deps/` or on the system. The encryption path therefore
+cannot be exercised here regardless of the cmake flag. The wrapper handles the
+absence cleanly (returns the error, no crash) — verified by tests/server_api.prg.
+
+To get a real encryption round-trip you must vendor libmongocrypt and point
+`-DENABLE_CLIENT_SIDE_ENCRYPTION=ON` at it.
 
 Note: `hbmongoc.hbx` is **stale** — it still lists 498 `DYNAMIC` entries while
 `src/` now defines 606 `HB_FUNC`. hbmk2 regenerates `.hbx` only as an install

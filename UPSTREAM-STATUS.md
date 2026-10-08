@@ -111,25 +111,33 @@ remainder is genuinely not wrappable in Harbour: C function pointers (apm /
 oidc / stream-initiator setters), value-semantics structs (bson_vector_*_view_t,
 struct sockaddr, oidc_callback_params_t), and bcon varargs macros.
 
-## Client-side encryption: not buildable in this environment
+## Client-side encryption: vendored libmongocrypt (now buildable)
 
-`mongoc_client_encryption_*` compiles and links, but at runtime reports
-"libmongoc is not built with support for Client-Side Field Level Encryption".
-Forcing `ENABLE_CLIENT_SIDE_ENCRYPTION=ON` in the `.deps` cmake fails:
+`libmongocrypt` was missing, so `ENABLE_CLIENT_SIDE_ENCRYPTION=ON` failed with
+"Required library (libmongocrypt) not found". It is a separate MongoDB library
+(https://github.com/mongodb/libmongocrypt), not part of mongo-c-driver.
 
+Vendored it into `.deps/libmongocrypt` (same tree as `mongod`) at tag **1.20.4**
+(mongoc requires >= 1.20.0; the `main` default BUILD_VERSION 0.0.0 is rejected,
+so `-DBUILD_VERSION=1.20.4` must be passed explicitly), built it into
+`.deps/usr/local`, then reconfigured mongoc with `-DENABLE_CLIENT_SIDE_ENCRYPTION=ON`.
+
+Result: mongoc now finds `libmongocrypt 1.20.4` and configures cleanly. The
+Harbour package builds and `tests/server_api.prg` reaches the real encryption
+code path — `mongoc_client_encryption_new` now returns a genuine usage error
+("KMS providers option required") instead of "not built", proving the lib is
+linked and the path runs. A full encrypt/decrypt round-trip still needs a
+valid KMS provider config (binary keyMaterial), which the test does not set up.
+
+Rebuild recipe:
 ```
-CMake Error at src/libmongoc/CMakeLists.txt:517 (message):
-  Required library (libmongocrypt) not found.
+cmake -S .deps/libmongocrypt -B .deps/libmongocrypt/build \
+  -DCMAKE_INSTALL_PREFIX=$PWD/.deps/usr/local \
+  -DMONGOCRYPT_MONGOC_DIR=$PWD/.deps/src -DENABLE_MONGOC=OFF \
+  -DBUILD_OFFLINE=ON -DBUILD_VERSION=1.20.4
+cmake --build .deps/libmongocrypt/build --target install
+cmake -S .deps/src -B .deps/build ... -DENABLE_CLIENT_SIDE_ENCRYPTION=ON
 ```
-
-Client-side encryption needs **libmongocrypt**, a separate MongoDB library
-(https://github.com/mongodb/libmongocrypt) that is not part of mongo-c-driver
-and is not present in `.deps/` or on the system. The encryption path therefore
-cannot be exercised here regardless of the cmake flag. The wrapper handles the
-absence cleanly (returns the error, no crash) — verified by tests/server_api.prg.
-
-To get a real encryption round-trip you must vendor libmongocrypt and point
-`-DENABLE_CLIENT_SIDE_ENCRYPTION=ON` at it.
 
 Note: `hbmongoc.hbx` is **stale** — it still lists 498 `DYNAMIC` entries while
 `src/` now defines 606 `HB_FUNC`. hbmk2 regenerates `.hbx` only as an install

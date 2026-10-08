@@ -118,9 +118,12 @@ PROCEDURE main( uri )
     encOpts := mongoc_client_encryption_opts_new()
 
     IF encOpts # nil
-            /* no keyvault client -> encryption object needs a keyvault;
-               that path needs a server keyvault, so just verify the
-               object constructs and tears down cleanly. */
+            /* keyvault client + namespace are required to construct the
+               encryption object; point them at this same client. */
+            mongoc_client_encryption_opts_set_keyvault_client( encOpts, client )
+            mongoc_client_encryption_opts_set_keyvault_namespace( encOpts, "testdb", "keys" )
+            /* keyvault-only construction: proves the libmongocrypt code path
+               runs (error is a real usage requirement, not "not built"). */
             enc := mongoc_client_encryption_new( encOpts, @error )
             IF enc # nil
                 ? "client_encryption_new: ok"

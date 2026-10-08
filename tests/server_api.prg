@@ -20,6 +20,13 @@ PROCEDURE main( uri )
     LOCAL reply      := nil
     LOCAL error      := nil
     LOCAL uri_
+    LOCAL bw         := nil
+    LOCAL ins        := nil
+    LOCAL ret        := nil
+    LOCAL res        := nil
+    LOCAL exc        := nil
+    LOCAL encOpts    := nil
+    LOCAL enc        := nil
 
     IF empty( uri )
         uri_ := "mongodb://127.0.0.1:27017"
@@ -77,6 +84,52 @@ PROCEDURE main( uri )
         mongoc_client_pool_destroy( pool )
     ELSE
         ? "client_pool_new: nil"
+    ENDIF
+
+    /* ---- bulkwrite: append + execute against the live server ---- */
+    bw := mongoc_client_bulkwrite_new( client )
+
+    IF bw # nil
+            ins := { "name" => "bw1", "v" => 1 }
+            IF mongoc_bulkwrite_append_insertone( bw, "testdb.apitest", ins, nil, @error )
+                ? "bulkwrite_append_insertone: ok"
+                ret := mongoc_bulkwrite_execute( bw, nil )
+                IF ret # nil
+                    res := ret["result"]
+                    exc := ret["exception"]
+                    IF res # nil
+                        ? "bulkwrite result: insertedCount =", mongoc_bulkwriteresult_insertedcount( res )
+                        mongoc_bulkwriteresult_destroy( res )
+                    ELSE
+                        IF exc # nil
+                            ? "bulkwrite exception error:", HB_BSON_ERROR_MESSAGE( exc )
+                            mongoc_bulkwriteexception_destroy( exc )
+                        ENDIF
+                    ENDIF
+                ENDIF
+            ELSE
+                ? "bulkwrite_append error:", HB_BSON_ERROR_MESSAGE( error )
+            ENDIF
+    ELSE
+        ? "bulkwrite_new: nil"
+    ENDIF
+
+    /* ---- client-side encryption: construct + teardown ---- */
+    encOpts := mongoc_client_encryption_opts_new()
+
+    IF encOpts # nil
+            /* no keyvault client -> encryption object needs a keyvault;
+               that path needs a server keyvault, so just verify the
+               object constructs and tears down cleanly. */
+            enc := mongoc_client_encryption_new( encOpts, @error )
+            IF enc # nil
+                ? "client_encryption_new: ok"
+                mongoc_client_encryption_destroy( enc )
+            ELSE
+                ? "client_encryption_new error:", HB_BSON_ERROR_MESSAGE( error )
+            ENDIF
+    ELSE
+        ? "client_encryption_opts_new: nil"
     ENDIF
 
     mongoc_client_destroy( client )

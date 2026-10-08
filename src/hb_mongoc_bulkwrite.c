@@ -123,8 +123,9 @@ HB_FUNC( MONGOC_BULKWRITE_EXECUTE )
       hb_itemPutC( pKey, "result" );
       if ( ret.res )
       {
-         PHB_MONGOC phRes = hbmongoc_new_dataContainer( _hbmongoc_bulkwriteresult_t_, ret.res );
-         hb_hashAdd( pHash, pKey, phRes );
+         PHB_ITEM pResItem = hb_itemNew( NULL );
+         hb_itemPutPtrGC( pResItem, hbmongoc_new_dataContainer( _hbmongoc_bulkwriteresult_t_, ret.res ) );
+         hb_hashAdd( pHash, pKey, pResItem );
       }
       else
       {
@@ -137,8 +138,9 @@ HB_FUNC( MONGOC_BULKWRITE_EXECUTE )
       hb_itemPutC( pKey, "exception" );
       if ( ret.exc )
       {
-         PHB_MONGOC phExc = hbmongoc_new_dataContainer( _hbmongoc_bulkwriteexception_t_, ret.exc );
-         hb_hashAdd( pHash, pKey, phExc );
+         PHB_ITEM pExcItem = hb_itemNew( NULL );
+         hb_itemPutPtrGC( pExcItem, hbmongoc_new_dataContainer( _hbmongoc_bulkwriteexception_t_, ret.exc ) );
+         hb_hashAdd( pHash, pKey, pExcItem );
       }
       else
       {

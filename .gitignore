@@ -24,3 +24,4 @@ tests/test_02
 tests/test_03
 examples/libbson/bcon-speed
 api_surface
+tests/server_api

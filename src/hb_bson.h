@@ -37,7 +37,8 @@ typedef enum
     _hbbson_reader_t_,
     _hbbson_json_opts_t_,
     _hbbson_json_reader_t_,
-    _hbbson_writer_t_
+    _hbbson_writer_t_,
+    _hbbson_array_builder_t_
 } hbbson_t_;
 
 typedef struct _HB_BSON_
@@ -57,6 +58,7 @@ bson_reader_t *     bson_reader_hbparam( int iParam );
 bson_json_opts_t *  bson_json_opts_hbparam( int iParam );
 bson_json_reader_t *bson_json_reader_hbparam( int iParam );
 bson_writer_t *     bson_writer_hbparam( int iParam );
+bson_array_builder_t * bson_array_builder_hbparam( int iParam );
 bson_t *            get_bson_item(PHB_ITEM pItem);
 char *              hbbson_as_json( const bson_t * bson );
 PHB_BSON            hbbson_new_dataContainer( hbbson_t_ hbbson_type, void * p );

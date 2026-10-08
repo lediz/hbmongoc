@@ -94,6 +94,12 @@ static HB_GARBAGE_FUNC( hbbson_gc_func )
                     phBson->p = NULL;
                 }
                 break;
+            case _hbbson_array_builder_t_:
+                if ( phBson->p ) {
+                    bson_array_builder_destroy( phBson->p );
+                    phBson->p = NULL;
+                }
+                break;
         }
     }
 }
@@ -186,6 +192,16 @@ bson_json_reader_t * bson_json_reader_hbparam( int iParam )
 bson_writer_t * bson_writer_hbparam( int iParam )
 {
     PHB_BSON phBson = hbbson_param( iParam, _hbbson_writer_t_ );
+
+    if ( phBson ) {
+        return phBson->p;
+    }
+    return NULL;
+}
+
+bson_array_builder_t * bson_array_builder_hbparam( int iParam )
+{
+    PHB_BSON phBson = hbbson_param( iParam, _hbbson_array_builder_t_ );
 
     if ( phBson ) {
         return phBson->p;

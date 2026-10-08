@@ -188,6 +188,9 @@ static HB_GARBAGE_FUNC( hbmongoc_funcs_destroy )
             case _hbmongoc_socket_t_:
                 mongoc_socket_destroy( ( mongoc_socket_t * ) phMongoc->p );
                 break;
+            case _hbmongoc_oidc_credential_t_:
+                mongoc_oidc_credential_destroy( ( mongoc_oidc_credential_t * ) phMongoc->p );
+                break;
         }
         phMongoc->p = NULL;
     }

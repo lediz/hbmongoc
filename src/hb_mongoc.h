@@ -59,7 +59,12 @@ typedef enum
     _hbmongoc_apm_topology_closed_t_,
     _hbmongoc_apm_server_heartbeat_started_t_,
     _hbmongoc_apm_server_heartbeat_succeeded_t_,
-    _hbmongoc_apm_server_heartbeat_failed_t_
+    _hbmongoc_apm_server_heartbeat_failed_t_,
+    _hbmongoc_gridfs_t_,
+    _hbmongoc_gridfs_file_t_,
+    _hbmongoc_gridfs_file_list_t_,
+    _hbmongoc_gridfs_bucket_t_,
+    _hbmongoc_stream_t_
 } hbmongoc_t_;
 
 typedef struct _HB_MONGOC_

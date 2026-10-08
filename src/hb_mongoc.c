@@ -97,6 +97,23 @@ static HB_GARBAGE_FUNC( hbmongoc_funcs_destroy )
             case _hbmongoc_apm_server_heartbeat_succeeded_t_:
             case _hbmongoc_apm_server_heartbeat_failed_t_:
                 break;
+            /* gridfs objects are owned by the caller */
+            case _hbmongoc_gridfs_t_:
+                mongoc_gridfs_destroy( ( mongoc_gridfs_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_gridfs_file_t_:
+                mongoc_gridfs_file_destroy( ( mongoc_gridfs_file_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_gridfs_file_list_t_:
+                mongoc_gridfs_file_list_destroy( ( mongoc_gridfs_file_list_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_gridfs_bucket_t_:
+                mongoc_gridfs_bucket_destroy( ( mongoc_gridfs_bucket_t * ) phMongoc->p );
+                break;
+            /* mongoc_stream_t has no single destroy entry point; the
+               concrete stream type decides. Leave it to the caller. */
+            case _hbmongoc_stream_t_:
+                break;
         }
         phMongoc->p = NULL;
     }

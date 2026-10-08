@@ -58,6 +58,13 @@ HB_FUNC( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_NEW )
    else { hb_ret(); }
 }
 
+HB_FUNC( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_DESTROY )
+{
+   PHB_MONGOC self = hbmongoc_param( 1, _hbmongoc_client_encryption_encrypt_opts_t_ );
+   if ( self ) { mongoc_client_encryption_encrypt_opts_destroy( ( mongoc_client_encryption_encrypt_opts_t * ) self->p ); self->p = NULL; }
+   else { HBMONGOC_ERR_ARGS(); }
+}
+
 HB_FUNC( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_RANGE_OPTS_NEW )
 {
    mongoc_client_encryption_encrypt_range_opts_t * self = mongoc_client_encryption_encrypt_range_opts_new();
@@ -168,6 +175,37 @@ HB_FUNC( MONGOC_AUTO_ENCRYPTION_OPTS_SET_KEYVAULT_NAMESPACE )
  * ------------------------------------------------------------------ */
 
 HB_ENC_SET_BSON( MONGOC_CLIENT_ENCRYPTION_OPTS_SET_KMS_PROVIDERS, client_encryption_opts, mongoc_client_encryption_opts_set_kms_providers )
+
+/* Build the { local : { keyMaterial : <binary> } } KMS-providers document
+   in C from a raw Harbour string, because a Harbour hash cannot carry a
+   BSON binary subtype. keyMaterial must be exactly 16/24/32 bytes. */
+HB_FUNC( MONGOC_CLIENT_ENCRYPTION_OPTS_SET_LOCAL_KMS_KEY )
+{
+   mongoc_client_encryption_opts_t * opts = mongoc_hbparam( 1, _hbmongoc_client_encryption_opts_t_ );
+   const char * key = hb_parc( 2 );
+
+   if ( opts && key )
+   {
+      bson_t providers;
+      bson_t local;
+      bson_init( &providers );
+      bson_init( &local );
+
+      bson_append_utf8( &local, "keyMaterial", -1, key, (int) strlen( key ) );
+      bson_append_document( &providers, "local", -1, &local );
+
+      mongoc_client_encryption_opts_set_kms_providers( opts, &providers );
+
+      bson_destroy( &providers );
+      bson_destroy( &local );
+
+      hb_retl( true );
+   }
+   else
+   {
+      HBMONGOC_ERR_ARGS();
+   }
+}
 HB_ENC_SET_BSON( MONGOC_CLIENT_ENCRYPTION_OPTS_SET_TLS_OPTS, client_encryption_opts, mongoc_client_encryption_opts_set_tls_opts )
 HB_ENC_SET_U64( MONGOC_CLIENT_ENCRYPTION_OPTS_SET_KEY_EXPIRATION, client_encryption_opts, mongoc_client_encryption_opts_set_key_expiration )
 

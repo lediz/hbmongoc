@@ -27,6 +27,8 @@ PROCEDURE main( uri )
     LOCAL exc        := nil
     LOCAL encOpts    := nil
     LOCAL enc        := nil
+    LOCAL eopts      := nil
+    LOCAL cipher     := nil
 
     IF empty( uri )
         uri_ := "mongodb://127.0.0.1:27017"
@@ -123,7 +125,9 @@ PROCEDURE main( uri )
             mongoc_client_encryption_opts_set_keyvault_client( encOpts, client )
             mongoc_client_encryption_opts_set_keyvault_namespace( encOpts, "testdb", "keys" )
             /* keyvault-only construction: proves the libmongocrypt code path
-               runs (error is a real usage requirement, not "not built"). */
+               runs (error is a real usage requirement, not "not built").
+               A full encrypt round-trip needs the exact mongoc local-KMS
+               provider schema (keyMaterial shape), not reproduced here. */
             enc := mongoc_client_encryption_new( encOpts, @error )
             IF enc # nil
                 ? "client_encryption_new: ok"

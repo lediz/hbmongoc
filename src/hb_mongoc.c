@@ -154,6 +154,37 @@ static HB_GARBAGE_FUNC( hbmongoc_funcs_destroy )
             case _hbmongoc_structured_log_opts_t_:
             case _hbmongoc_auto_encryption_opts_t_:
                 break;
+            /* client-side encryption family */
+            case _hbmongoc_client_encryption_t_:
+                mongoc_client_encryption_destroy( ( mongoc_client_encryption_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_opts_t_:
+                mongoc_client_encryption_opts_destroy( ( mongoc_client_encryption_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_datakey_opts_t_:
+                mongoc_client_encryption_datakey_opts_destroy( ( mongoc_client_encryption_datakey_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_encrypt_opts_t_:
+                mongoc_client_encryption_encrypt_opts_destroy( ( mongoc_client_encryption_encrypt_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_encrypt_range_opts_t_:
+                mongoc_client_encryption_encrypt_range_opts_destroy( ( mongoc_client_encryption_encrypt_range_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_encrypt_string_opts_t_:
+                mongoc_client_encryption_encrypt_string_opts_destroy( ( mongoc_client_encryption_encrypt_string_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_encrypt_string_prefix_opts_t_:
+                mongoc_client_encryption_encrypt_string_prefix_opts_destroy( ( mongoc_client_encryption_encrypt_string_prefix_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_encrypt_string_substring_opts_t_:
+                mongoc_client_encryption_encrypt_string_substring_opts_destroy( ( mongoc_client_encryption_encrypt_string_substring_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_encrypt_string_suffix_opts_t_:
+                mongoc_client_encryption_encrypt_string_suffix_opts_destroy( ( mongoc_client_encryption_encrypt_string_suffix_opts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_client_encryption_rewrap_many_datakey_result_t_:
+                mongoc_client_encryption_rewrap_many_datakey_result_destroy( ( mongoc_client_encryption_rewrap_many_datakey_result_t * ) phMongoc->p );
+                break;
         }
         phMongoc->p = NULL;
     }

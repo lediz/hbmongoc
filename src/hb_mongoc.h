@@ -78,7 +78,17 @@ typedef enum
     _hbmongoc_client_pool_t_,
     _hbmongoc_ssl_opt_t_,
     _hbmongoc_structured_log_opts_t_,
-    _hbmongoc_auto_encryption_opts_t_
+    _hbmongoc_auto_encryption_opts_t_,
+    _hbmongoc_client_encryption_t_,
+    _hbmongoc_client_encryption_opts_t_,
+    _hbmongoc_client_encryption_datakey_opts_t_,
+    _hbmongoc_client_encryption_encrypt_opts_t_,
+    _hbmongoc_client_encryption_encrypt_range_opts_t_,
+    _hbmongoc_client_encryption_encrypt_string_opts_t_,
+    _hbmongoc_client_encryption_encrypt_string_prefix_opts_t_,
+    _hbmongoc_client_encryption_encrypt_string_substring_opts_t_,
+    _hbmongoc_client_encryption_encrypt_string_suffix_opts_t_,
+    _hbmongoc_client_encryption_rewrap_many_datakey_result_t_
 } hbmongoc_t_;
 
 typedef struct _HB_MONGOC_

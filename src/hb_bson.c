@@ -399,6 +399,7 @@ PHB_BSON hbbson_new_dataContainer( hbbson_t_ hbbson_type, void * p )
             case _hbbson_json_opts_t_:
             case _hbbson_json_reader_t_:
             case _hbbson_writer_t_:
+            case _hbbson_array_builder_t_:
                 phBson->p = p;
                 break;
         }
@@ -430,6 +431,7 @@ PHB_BSON hbbson_param( int iParam, hbbson_t_ hbbson_type )
                 case _hbbson_json_opts_t_:
                 case _hbbson_json_reader_t_:
                 case _hbbson_writer_t_:
+                case _hbbson_array_builder_t_:
                     if ( phBson->p ) {
                         return phBson;
                     }

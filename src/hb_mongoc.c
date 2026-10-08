@@ -145,6 +145,15 @@ static HB_GARBAGE_FUNC( hbmongoc_funcs_destroy )
             case _hbmongoc_bulkwrite_deletemanyopts_t_:
                 mongoc_bulkwrite_deletemanyopts_destroy( ( mongoc_bulkwrite_deletemanyopts_t * ) phMongoc->p );
                 break;
+            case _hbmongoc_client_pool_t_:
+                mongoc_client_pool_destroy( ( mongoc_client_pool_t * ) phMongoc->p );
+                break;
+            /* ssl_opt / structured_log_opts / auto_encryption_opts are
+               plain option structs; the caller owns them. */
+            case _hbmongoc_ssl_opt_t_:
+            case _hbmongoc_structured_log_opts_t_:
+            case _hbmongoc_auto_encryption_opts_t_:
+                break;
         }
         phMongoc->p = NULL;
     }

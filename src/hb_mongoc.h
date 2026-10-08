@@ -74,7 +74,11 @@ typedef enum
     _hbmongoc_bulkwrite_updatemanyopts_t_,
     _hbmongoc_bulkwrite_replaceoneopts_t_,
     _hbmongoc_bulkwrite_deleteoneopts_t_,
-    _hbmongoc_bulkwrite_deletemanyopts_t_
+    _hbmongoc_bulkwrite_deletemanyopts_t_,
+    _hbmongoc_client_pool_t_,
+    _hbmongoc_ssl_opt_t_,
+    _hbmongoc_structured_log_opts_t_,
+    _hbmongoc_auto_encryption_opts_t_
 } hbmongoc_t_;
 
 typedef struct _HB_MONGOC_

@@ -185,6 +185,9 @@ static HB_GARBAGE_FUNC( hbmongoc_funcs_destroy )
             case _hbmongoc_client_encryption_rewrap_many_datakey_result_t_:
                 mongoc_client_encryption_rewrap_many_datakey_result_destroy( ( mongoc_client_encryption_rewrap_many_datakey_result_t * ) phMongoc->p );
                 break;
+            case _hbmongoc_socket_t_:
+                mongoc_socket_destroy( ( mongoc_socket_t * ) phMongoc->p );
+                break;
         }
         phMongoc->p = NULL;
     }

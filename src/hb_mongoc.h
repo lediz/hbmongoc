@@ -88,7 +88,8 @@ typedef enum
     _hbmongoc_client_encryption_encrypt_string_prefix_opts_t_,
     _hbmongoc_client_encryption_encrypt_string_substring_opts_t_,
     _hbmongoc_client_encryption_encrypt_string_suffix_opts_t_,
-    _hbmongoc_client_encryption_rewrap_many_datakey_result_t_
+    _hbmongoc_client_encryption_rewrap_many_datakey_result_t_,
+    _hbmongoc_socket_t_
 } hbmongoc_t_;
 
 typedef struct _HB_MONGOC_

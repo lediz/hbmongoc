@@ -64,7 +64,17 @@ typedef enum
     _hbmongoc_gridfs_file_t_,
     _hbmongoc_gridfs_file_list_t_,
     _hbmongoc_gridfs_bucket_t_,
-    _hbmongoc_stream_t_
+    _hbmongoc_stream_t_,
+    _hbmongoc_bulkwrite_t_,
+    _hbmongoc_bulkwriteopts_t_,
+    _hbmongoc_bulkwriteresult_t_,
+    _hbmongoc_bulkwriteexception_t_,
+    _hbmongoc_bulkwrite_insertoneopts_t_,
+    _hbmongoc_bulkwrite_updateoneopts_t_,
+    _hbmongoc_bulkwrite_updatemanyopts_t_,
+    _hbmongoc_bulkwrite_replaceoneopts_t_,
+    _hbmongoc_bulkwrite_deleteoneopts_t_,
+    _hbmongoc_bulkwrite_deletemanyopts_t_
 } hbmongoc_t_;
 
 typedef struct _HB_MONGOC_

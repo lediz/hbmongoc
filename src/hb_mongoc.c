@@ -114,6 +114,37 @@ static HB_GARBAGE_FUNC( hbmongoc_funcs_destroy )
                concrete stream type decides. Leave it to the caller. */
             case _hbmongoc_stream_t_:
                 break;
+            /* bulkwrite family */
+            case _hbmongoc_bulkwrite_t_:
+                mongoc_bulkwrite_destroy( ( mongoc_bulkwrite_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwriteopts_t_:
+                mongoc_bulkwriteopts_destroy( ( mongoc_bulkwriteopts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwriteresult_t_:
+                mongoc_bulkwriteresult_destroy( ( mongoc_bulkwriteresult_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwriteexception_t_:
+                mongoc_bulkwriteexception_destroy( ( mongoc_bulkwriteexception_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwrite_insertoneopts_t_:
+                mongoc_bulkwrite_insertoneopts_destroy( ( mongoc_bulkwrite_insertoneopts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwrite_updateoneopts_t_:
+                mongoc_bulkwrite_updateoneopts_destroy( ( mongoc_bulkwrite_updateoneopts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwrite_updatemanyopts_t_:
+                mongoc_bulkwrite_updatemanyopts_destroy( ( mongoc_bulkwrite_updatemanyopts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwrite_replaceoneopts_t_:
+                mongoc_bulkwrite_replaceoneopts_destroy( ( mongoc_bulkwrite_replaceoneopts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwrite_deleteoneopts_t_:
+                mongoc_bulkwrite_deleteoneopts_destroy( ( mongoc_bulkwrite_deleteoneopts_t * ) phMongoc->p );
+                break;
+            case _hbmongoc_bulkwrite_deletemanyopts_t_:
+                mongoc_bulkwrite_deletemanyopts_destroy( ( mongoc_bulkwrite_deletemanyopts_t * ) phMongoc->p );
+                break;
         }
         phMongoc->p = NULL;
     }

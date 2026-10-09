@@ -29,6 +29,7 @@ PROCEDURE main( uri )
     LOCAL enc        := nil
     LOCAL eopts      := nil
     LOCAL cipher     := nil
+    LOCAL plaintext  := nil
 
     IF empty( uri )
         uri_ := "mongodb://127.0.0.1:27017"
@@ -128,13 +129,22 @@ PROCEDURE main( uri )
             mongoc_client_encryption_opts_set_local_kms_key( encOpts, "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456" )
             enc := mongoc_client_encryption_new( encOpts, @error )
             IF enc # nil
-                ? "client_encryption_new: ok (local KMS 96-byte key accepted)"
-                /* full encrypt round-trip not driven here: mongoc_client_encryption_encrypt
-                   traffics in bson_value_t* in/out params that have no Harbour box type. */
-                mongoc_client_encryption_destroy( enc )
-            ENDIF
-            IF enc # nil
                 ? "client_encryption_new: ok"
+                eopts := mongoc_client_encryption_encrypt_opts_new()
+                IF eopts # nil
+                    mongoc_client_encryption_encrypt_opts_set_algorithm( eopts, "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic" )
+                    mongoc_client_encryption_encrypt_opts_set_keyaltname( eopts, "k1" )
+                    plaintext := bson_value_new_str( "secret-value" )
+                    IF plaintext # nil
+                        IF mongoc_client_encryption_encrypt( enc, plaintext, eopts, @cipher, @error )
+                            ? "encrypt: ok, cipher =", bson_value_get_str( cipher )
+                        ELSE
+                            ? "encrypt error:", HB_BSON_ERROR_MESSAGE( error )
+                        ENDIF
+                        bson_value_destroy( plaintext )
+                    ENDIF
+                    mongoc_client_encryption_encrypt_opts_destroy( eopts )
+                ENDIF
                 mongoc_client_encryption_destroy( enc )
             ELSE
                 ? "client_encryption_new error:", HB_BSON_ERROR_MESSAGE( error )

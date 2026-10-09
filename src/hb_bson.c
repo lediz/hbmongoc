@@ -1697,6 +1697,56 @@ HB_FUNC( BSON_SNPRINTF )
     }
 }
 
+HB_FUNC( BSON_VALUE_NEW_STR )
+{
+    /* wrap a Harbour string as a bson_value_t (BSON_TYPE_UTF8) so it can
+       feed the client-side encryption in/out params. */
+    const char * str = hb_parc( 1 );
+
+    if ( str ) {
+        bson_value_t * val = hb_xgrab( sizeof( bson_value_t ) );
+
+        if ( val ) {
+            memset( val, 0, sizeof( bson_value_t ) );
+            val->value_type = BSON_TYPE_UTF8;
+            /* mongoc's bson_value_destroy frees v_utf8.str with libc free(),
+               so it must be malloc'd, not hb_xgrab'd. */
+            val->value.v_utf8.str = malloc( strlen( str ) + 1 );
+            memcpy( val->value.v_utf8.str, str, strlen( str ) + 1 );
+            val->value.v_utf8.len = (uint32_t) strlen( str );
+
+            PHB_BSON phValue = hbbson_new_dataContainer( _hbbson_value_t_, val );
+            hb_retptrGC( phValue );
+        } else {
+            hb_ret();
+        }
+    } else {
+        HBBSON_ERR_ARGS();
+    }
+}
+
+HB_FUNC( BSON_VALUE_GET_STR )
+{
+    /* read a wrapped bson_value_t back to a Harbour string (utf8 or binary). */
+    const bson_value_t * val = bson_value_hbparam( 1 );
+
+    if ( val ) {
+        switch ( val->value_type ) {
+            case BSON_TYPE_UTF8:
+                hb_retc( val->value.v_utf8.str );
+                break;
+            case BSON_TYPE_BINARY:
+                hb_retc( (const char *) val->value.v_binary.data );
+                break;
+            default:
+                hb_ret();
+                break;
+        }
+    } else {
+        HBBSON_ERR_ARGS();
+    }
+}
+
 HB_FUNC( BSON_VALUE_COPY )
 {
     const bson_value_t * src = bson_value_hbparam( 1 );

@@ -530,11 +530,20 @@ HB_FUNC( MONGOC_CLIENT_ENCRYPTION_ENCRYPT )
    mongoc_client_encryption_t * enc = mongoc_hbparam( 1, _hbmongoc_client_encryption_t_ );
    const bson_value_t * value = bson_value_hbparam( 2 );
    mongoc_client_encryption_encrypt_opts_t * opts = mongoc_hbparam( 3, _hbmongoc_client_encryption_encrypt_opts_t_ );
-   bson_value_t * ciphertext = bson_value_hbparam( 4 );
-   if ( enc && value && opts && ciphertext )
+
+   if ( enc && value && opts && HB_ISBYREF( 4 ) )
    {
+      bson_value_t * cipher = hb_xgrab( sizeof( bson_value_t ) );
+      memset( cipher, 0, sizeof( bson_value_t ) );
+
       bson_error_t error;
-      bool result = mongoc_client_encryption_encrypt( enc, value, opts, ciphertext, &error );
+      bool result = mongoc_client_encryption_encrypt( enc, value, opts, cipher, &error );
+
+      /* store the produced ciphertext back into the byref slot as a wrapped
+         bson_value_t so the caller can read it via bson_value_get_str. */
+      PHB_BSON phCipher = hbbson_new_dataContainer( _hbbson_value_t_, cipher );
+      hb_storptrGC( phCipher, 4 );
+
       bson_hbstor_byref_error( 5, &error, result );
       hb_retl( result );
    }

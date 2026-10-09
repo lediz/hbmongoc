@@ -30,6 +30,10 @@ PROCEDURE main( uri )
     LOCAL eopts      := nil
     LOCAL cipher     := nil
     LOCAL plaintext  := nil
+    LOCAL dko        := nil
+    LOCAL keyid      := nil
+    LOCAL recovered  := nil
+    LOCAL altname    := nil
 
     IF empty( uri )
         uri_ := "mongodb://127.0.0.1:27017"
@@ -130,14 +134,33 @@ PROCEDURE main( uri )
             enc := mongoc_client_encryption_new( encOpts, @error )
             IF enc # nil
                 ? "client_encryption_new: ok"
+                /* seed the keyvault: create a datakey with alt-name "k1" */
+                dko := mongoc_client_encryption_datakey_opts_new()
+                IF dko # nil
+                    altname := "k" + hb_ntos( Seconds() )
+                    mongoc_client_encryption_datakey_opts_set_keyaltames( dko, { altname } )
+                    keyid := nil
+                    IF mongoc_client_encryption_create_datakey( enc, "local", dko, @keyid, @error )
+                        ? "create_datakey: ok"
+                    ELSE
+                        ? "create_datakey error:", HB_BSON_ERROR_MESSAGE( error )
+                    ENDIF
+                    mongoc_client_encryption_datakey_opts_destroy( dko )
+                ENDIF
                 eopts := mongoc_client_encryption_encrypt_opts_new()
                 IF eopts # nil
                     mongoc_client_encryption_encrypt_opts_set_algorithm( eopts, "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic" )
-                    mongoc_client_encryption_encrypt_opts_set_keyaltname( eopts, "k1" )
+                    mongoc_client_encryption_encrypt_opts_set_keyaltname( eopts, altname )
                     plaintext := bson_value_new_str( "secret-value" )
                     IF plaintext # nil
                         IF mongoc_client_encryption_encrypt( enc, plaintext, eopts, @cipher, @error )
-                            ? "encrypt: ok, cipher =", bson_value_get_str( cipher )
+                            ? "encrypt: ok"
+                            recovered := nil
+                            IF mongoc_client_encryption_decrypt( enc, cipher, @recovered, @error )
+                                ? "decrypt: ok, recovered =", bson_value_get_str( recovered )
+                            ELSE
+                                ? "decrypt error:", HB_BSON_ERROR_MESSAGE( error )
+                            ENDIF
                         ELSE
                             ? "encrypt error:", HB_BSON_ERROR_MESSAGE( error )
                         ENDIF

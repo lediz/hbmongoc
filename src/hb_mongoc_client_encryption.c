@@ -51,6 +51,13 @@ HB_FUNC( MONGOC_CLIENT_ENCRYPTION_DATAKEY_OPTS_NEW )
    else { hb_ret(); }
 }
 
+HB_FUNC( MONGOC_CLIENT_ENCRYPTION_DATAKEY_OPTS_DESTROY )
+{
+   PHB_MONGOC self = hbmongoc_param( 1, _hbmongoc_client_encryption_datakey_opts_t_ );
+   if ( self ) { mongoc_client_encryption_datakey_opts_destroy( ( mongoc_client_encryption_datakey_opts_t * ) self->p ); self->p = NULL; }
+   else { HBMONGOC_ERR_ARGS(); }
+}
+
 HB_FUNC( MONGOC_CLIENT_ENCRYPTION_ENCRYPT_OPTS_NEW )
 {
    mongoc_client_encryption_encrypt_opts_t * self = mongoc_client_encryption_encrypt_opts_new();
@@ -514,15 +521,25 @@ HB_FUNC( MONGOC_CLIENT_ENCRYPTION_CREATE_DATAKEY )
    mongoc_client_encryption_t * enc = mongoc_hbparam( 1, _hbmongoc_client_encryption_t_ );
    const char * kms = hb_parc( 2 );
    const mongoc_client_encryption_datakey_opts_t * opts = mongoc_hbparam( 3, _hbmongoc_client_encryption_datakey_opts_t_ );
-   bson_value_t * keyid = bson_value_hbparam( 4 );
-   if ( enc && kms && opts && keyid )
+
+   if ( enc && kms && opts && HB_ISBYREF( 4 ) )
    {
+      bson_value_t * keyid = hb_xgrab( sizeof( bson_value_t ) );
+      memset( keyid, 0, sizeof( bson_value_t ) );
+
       bson_error_t error;
       bool result = mongoc_client_encryption_create_datakey( enc, kms, opts, keyid, &error );
+
+      /* store the produced keyid (UUID bson value) into the byref slot */
+      PHB_BSON phKeyid = hbbson_new_dataContainer( _hbbson_value_t_, keyid );
+      hb_storptrGC( phKeyid, 4 );
+
       bson_hbstor_byref_error( 5, &error, result );
       hb_retl( result );
    }
-   else { HBMONGOC_ERR_ARGS(); }
+   else {
+      HBMONGOC_ERR_ARGS();
+   }
 }
 
 HB_FUNC( MONGOC_CLIENT_ENCRYPTION_ENCRYPT )
@@ -554,11 +571,19 @@ HB_FUNC( MONGOC_CLIENT_ENCRYPTION_DECRYPT )
 {
    mongoc_client_encryption_t * enc = mongoc_hbparam( 1, _hbmongoc_client_encryption_t_ );
    const bson_value_t * ciphertext = bson_value_hbparam( 2 );
-   bson_value_t * value = bson_value_hbparam( 3 );
-   if ( enc && ciphertext && value )
+
+   if ( enc && ciphertext && HB_ISBYREF( 3 ) )
    {
+      bson_value_t * value = hb_xgrab( sizeof( bson_value_t ) );
+      memset( value, 0, sizeof( bson_value_t ) );
+
       bson_error_t error;
       bool result = mongoc_client_encryption_decrypt( enc, ciphertext, value, &error );
+
+      /* store the recovered plaintext into the byref slot */
+      PHB_BSON phVal = hbbson_new_dataContainer( _hbbson_value_t_, value );
+      hb_storptrGC( phVal, 3 );
+
       bson_hbstor_byref_error( 4, &error, result );
       hb_retl( result );
    }
